@@ -5,7 +5,7 @@ const express = require('express');
 const blogRoutes = require('./routes/blog');
 
 const app = express();
-
+const db = require('./Data/MongodbConnection');
 // Activate EJS view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -21,5 +21,9 @@ app.use(function (error, req, res, next) {
   console.log(error);
   res.status(500).render('500');
 });
+db.connecttodb().then(function(){
 
-app.listen(3000);
+  app.listen(3000);
+  
+})
+
