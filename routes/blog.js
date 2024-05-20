@@ -7,9 +7,30 @@ router.get('/', function (req, res) {
   res.redirect('/posts');
 });
 
-router.get('/posts', function (req, res) {
-  res.render('posts-list');
+router.get('/posts', async function (req, res) {
+  const postsgetdata = await db
+    .checkconnection()
+    .collection('posts')
+    .find({}, { title: 1, summary: 1, 'author.name': 1 })
+    .toArray();
+  res.render('posts-list', { postsdata: postsgetdata });
 });
+
+
+router.get('/posts/:id', async function (req, res) {
+  const postid = req.params.id;
+  const post = await db
+    .checkconnection()
+    .collection('posts')
+    .findOne({ _id: new ObjectId(postid) }, { summary: 0 });
+
+  if (!post) {
+    return res.status(404).render('404');
+  }
+  res.render('post-detail', { post: post })
+})
+
+
 
 router.get('/new-post', async function (req, res) {
   const authors = await db.checkconnection().collection('authors').find().toArray();
@@ -32,8 +53,8 @@ router.post('/posts', async function (req, res) {
   }
 
   const result = await db.checkconnection().collection('posts').insertOne(postnew);
-console.log(result);
-res.redirect('/posts');
+  console.log(result);
+  res.redirect('/posts');
 
 })
 module.exports = router;
